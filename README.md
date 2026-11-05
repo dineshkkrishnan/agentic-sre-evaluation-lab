@@ -1,5 +1,7 @@
 # Agentic SRE Evaluation Lab
 
+[![CI](https://github.com/dineshkkrishnan/agentic-sre-evaluation-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/dineshkkrishnan/agentic-sre-evaluation-lab/actions/workflows/tests.yml)
+
 An evaluation harness for **incident recommendation outputs**, with synthetic cases, a deterministic baseline and an optional local Ollama adapter. No recommended actions are executed.
 
 ## Why evaluate first?
@@ -48,3 +50,18 @@ Define a rubric before inspecting a model's outputs. Decide how to handle absten
 Expand the dataset with independently reviewed labels and ambiguous multi-cause incidents; record model/version and repeated-run variance; add semantic evidence review and paired model comparisons. A real multistep tool-using agent is future work: this first version evaluates single recommendations.
 
 Independent portfolio lab by Dinesh Kumar Krishnan, prepared with AI assistance. All incidents are fictional; no employer or client data.
+
+## Verification and contributing
+
+The offline evaluator uses Python's standard library. From the **repository root**, run:
+
+```bash
+python3 -m unittest discover -s tests -v
+python3 -m compileall -q evaluate.py ollama_adapter.py tests
+python3 evaluate.py
+python3 evaluate.py --predictions data/unsafe_fixture.json --output output/unsafe_report.json
+```
+
+CI runs the unit suite and the two evaluator smoke tests across Python 3.11, 3.12 and 3.13 on pushes and pull requests. The Ollama adapter does **not** require a running model for offline tests, and the published example reports are not evidence of live model performance.
+
+If contributing, create a focused branch, add or update a regression test for changes to the scoring contract, and submit a pull request describing the fixture, expected result and safety implications. Keep cases fictional and never commit real incident logs, credentials or company data. A green CI run demonstrates only these deterministic checks—not operational safety or broad agent reliability.
