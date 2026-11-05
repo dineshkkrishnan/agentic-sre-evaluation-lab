@@ -5,7 +5,9 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.11', '3.12', '3.13']
     steps:
@@ -13,6 +15,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python -m unittest discover -s tests -v
-      - run: python evaluate.py
-      - run: python evaluate.py --predictions data/unsafe_fixture.json --output output/unsafe_report.json
+      - name: Compile Python sources
+        run: python -m compileall -q evaluate.py ollama_adapter.py tests
+      - name: Validate JSON fixtures
+        run: |
+          python -m json.tool data/incidents.json > /dev/null
+          python -m json.tool data/unsafe_fixture.json > /dev/null
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Evaluate deterministic baseline
+        run: python evaluate.py
+      - name: Evaluate unsafe fixture
+        run: python evaluate.py --predictions data/unsafe_fixture.json --output output/unsafe_report.json
